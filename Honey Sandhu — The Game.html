@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Honey Sandhu — The Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f4ef;--fg:#16161d;--mut:#5d6072;--ac:#c26a00;--ac2:#5b3fe0;--ac3:#d6336c;--card:#fff;--line:#d9d5ca;--px:"Press Start 2P",ui-monospace,Menlo,monospace;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a0b12;--fg:#e9eaf3;--mut:#9a9db3;--ac:#ffb703;--ac2:#8f73ff;--ac3:#ff5c9a;--card:#141726;--line:#262b42;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0a0b12;--fg:#e9eaf3;--mut:#9a9db3;--ac:#ffb703;--ac2:#8f73ff;--ac3:#ff5c9a;--card:#141726;--line:#262b42;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 60px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:hidden}
+body.lock{overflow:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:60}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;margin:0;line-height:1.1}
+.px{font-family:var(--px);font-size:11px;letter-spacing:.06em;line-height:1.7}
+#boot{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;text-align:center;padding:20px;transition:opacity .8s,transform .8s}
+#boot.hide{opacity:0;transform:scale(1.08);pointer-events:none}
+.bw{width:min(480px,100%)}
+.bt{font:400 clamp(20px,6vw,38px)/1.4 var(--px);margin:18px 0;color:var(--ac)}
+.bb{height:14px;border:2px solid var(--fg);padding:2px;margin:16px 0 26px}
+.bb i{display:block;height:100%;width:0;background:repeating-linear-gradient(90deg,var(--ac) 0 8px,transparent 8px 11px)}
+#start{font:400 13px var(--px);padding:14px 20px;background:var(--ac);color:#111;border:0;cursor:pointer;box-shadow:4px 4px 0 var(--ac2);animation:blink 1s steps(2) infinite}
+#start:disabled{opacity:.3;animation:none;cursor:default}
+@keyframes blink{50%{opacity:.55}}
+.hud{position:fixed;top:0;left:0;right:0;z-index:50;padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;display:flex;gap:12px;align-items:center;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);font:400 10px/1 var(--px)}
+.hud .lv{color:var(--ac);min-width:58px}
+.hud .bar{flex:1;height:8px;background:var(--line);overflow:hidden}
+.hud .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ac2),var(--ac3),var(--ac))}
+.hud .xp{min-width:92px;text-align:right}
+.hud button{all:unset;cursor:pointer;padding:5px 8px;border:1px solid var(--line)}
+.hud button:focus-visible{outline:2px solid var(--ac)}
+#glow{position:fixed;left:0;top:0;width:420px;height:420px;margin:-210px 0 0 -210px;background:radial-gradient(color-mix(in srgb,var(--ac2) 22%,transparent),transparent 65%);pointer-events:none;z-index:1;will-change:transform}
+@media (pointer:coarse){#glow{display:none}}
+#cf{position:fixed;inset:0;z-index:80;pointer-events:none}
+#lvup{position:fixed;left:50%;top:42%;z-index:90;transform:translate(-50%,-50%) scale(.4);opacity:0;font:400 clamp(22px,7vw,56px)/1.3 var(--px);color:var(--ac);text-shadow:4px 4px 0 var(--ac2);text-align:center;pointer-events:none;white-space:nowrap}
+#lvup.show{animation:lu 1.5s ease-out}
+@keyframes lu{15%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-80%) scale(1)}}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 62px);transform:translate(-50%,-30px);opacity:0;z-index:55;background:var(--card);border:2px solid var(--ac);padding:10px 16px;font-size:13px;transition:.5s;box-shadow:4px 4px 0 var(--ac2);pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{transform:translate(-50%,0);opacity:1}
+.toast b{color:var(--ac)}
+.hero{min-height:100svh;display:grid;place-items:center;text-align:center;padding:90px 20px 40px;perspective:900px;position:relative;overflow:hidden;background:radial-gradient(60% 50% at 50% 40%,color-mix(in srgb,var(--ac2) 24%,transparent),transparent 70%)}
+#stars{position:absolute;inset:0;width:100%;height:100%}
+.hero::after{content:"";position:absolute;left:-50%;right:-50%;bottom:-10%;height:45%;background:linear-gradient(var(--line) 1px,transparent 1px) 0 0/100% 40px,linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/60px 100%;transform:rotateX(70deg);transform-origin:bottom;animation:grid 3s linear infinite;mask-image:linear-gradient(transparent,#000)}
+@keyframes grid{to{background-position:0 40px,0 0}}
+.stage{transform-style:preserve-3d;transition:transform .15s ease-out;position:relative;z-index:2}
+.kicker{color:var(--ac);transform:translateZ(30px)}
+.hero h1{font:400 clamp(22px,6.4vw,64px)/1.35 var(--px);margin:22px 0;transform:translateZ(80px);position:relative;display:inline-block}
+.gl::before,.gl::after{content:attr(data-t);position:absolute;inset:0;overflow:hidden}
+.gl::before{color:var(--ac2);clip-path:inset(0 0 55% 0);animation:g1 3.2s infinite steps(1)}
+.gl::after{color:var(--ac3);clip-path:inset(55% 0 0 0);animation:g2 3.2s infinite steps(1)}
+@keyframes g1{0%,88%,100%{transform:none}90%{transform:translate(-5px,1px)}94%{transform:translate(4px,-1px)}}
+@keyframes g2{0%,80%,100%{transform:none}82%{transform:translate(5px,0)}86%{transform:translate(-4px,1px)}}
+#hTag{color:var(--mut);max-width:540px;margin:0 auto;transform:translateZ(40px);font-size:18px;min-height:56px}
+#hTag::after{content:"▌";color:var(--ac);animation:blink 1s steps(2) infinite}
+.scroll{margin-top:30px;color:var(--mut);animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(8px)}}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:2}
+.sec{padding:70px 0}
+.sec h2.big{font-size:clamp(28px,5vw,46px);margin-bottom:6px}
+.sub{color:var(--mut);margin:0 0 26px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:26px}
+.stat,.tile{background:var(--card);border:2px solid var(--line);padding:14px 18px}
+.stat b,.tile b{display:block;font:400 26px/1.3 var(--px);color:var(--ac2)}
+.stat span,.tile span{font-size:13px;color:var(--mut)}
+.track{position:relative;padding-left:34px;margin:40px 0}
+.track::before{content:"";position:absolute;left:7px;top:0;bottom:0;width:2px;background:repeating-linear-gradient(var(--line) 0 8px,transparent 8px 14px)}
+.fill{position:absolute;left:7px;top:0;width:3px;height:0;background:linear-gradient(var(--ac2),var(--ac3),var(--ac));box-shadow:0 0 12px var(--ac)}
+.plr{position:absolute;left:8px;top:0;font-size:24px;transform:translate(-50%,-50%);z-index:3;transition:top .12s linear;filter:drop-shadow(0 4px 6px rgba(0,0,0,.4))}
+.level{position:relative;min-height:75vh;display:flex;flex-direction:column;justify-content:center;padding:40px 0}
+.node{position:absolute;left:-34px;top:50%;width:16px;height:16px;background:var(--bg);border:2px solid var(--line);transform:rotate(45deg);transition:.5s}
+.level.on .node{border-color:var(--ac);background:var(--ac);box-shadow:0 0 0 6px color-mix(in srgb,var(--ac) 25%,transparent)}
+.tag{color:var(--ac)}
+.level h2{font-size:clamp(32px,6vw,56px);margin:10px 0}
+.yrs{color:var(--mut);font-size:14px;margin:0 0 12px}
+.level p.tx{max-width:560px;font-size:18px;margin:0}
+.pts{padding-left:20px;max-width:600px;color:var(--mut)}.pts li{margin:6px 0}.pts li::marker{color:var(--ac)}
+.stats{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px}
+.boss{margin-top:22px;max-width:420px}
+.boss .px:first-child{color:var(--ac3)}
+.hp{height:16px;border:2px solid var(--fg);margin:8px 0;padding:2px}
+.hp i{display:block;height:100%;width:100%;background:var(--ac3);transition:width 2.4s .5s cubic-bezier(.3,.7,.2,1)}
+.hpt{color:var(--ac)}
+.rv{opacity:0;transform:translateY(46px) scale(.98);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.12s}.rv.d2{transition-delay:.24s}.rv.d3{transition-delay:.36s}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.pc{perspective:800px;height:230px}
+.tilt{width:100%;height:100%;transition:transform .15s ease-out;transform-style:preserve-3d}
+.flip{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.7,.2,1);cursor:pointer}
+.flip:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+.pc.open .flip{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--card);border:2px solid var(--line);padding:22px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+.face.f::before{content:"";position:absolute;right:-40px;top:-40px;width:130px;height:130px;border-radius:50%;background:radial-gradient(var(--ac2),transparent 70%);opacity:.5}
+.face.k{transform:rotateY(180deg);border-color:var(--ac)}
+.face h3{font-size:24px;margin-top:8px}
+.face small{color:var(--ac);font:400 9px var(--px);letter-spacing:.08em}
+.face p{margin:8px 0 0;color:var(--mut);font-size:15px}
+.hint{font-size:12px;color:var(--mut)}
+.trophies{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.tr{perspective:700px}
+.tr>div{background:var(--card);border:2px dashed var(--line);padding:18px;text-align:center;transition:transform .15s ease-out,border-color .6s,box-shadow .6s;filter:grayscale(1);opacity:.55}
+.tr.on>div{filter:none;opacity:1;border:2px solid var(--ac);box-shadow:0 0 22px color-mix(in srgb,var(--ac) 35%,transparent)}
+.tr .ic{font-size:34px}.tr b{display:block;margin:6px 0 2px}.tr span{font-size:12px;color:var(--mut)}
+.sub2{margin:34px 0 12px;color:var(--ac)}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{padding:8px 14px;border:2px solid var(--line);background:var(--card);font-size:14px;transition:transform .2s,border-color .2s}
+.chip:hover{transform:translateY(-4px) rotate(-1.5deg);border-color:var(--ac)}
+.chip.lang{border-color:var(--ac2)}
+.credits{text-align:center;padding:120px 20px 140px;border-top:1px solid var(--line);position:relative;z-index:2}
+.credits h2{font:400 clamp(24px,6vw,52px)/1.4 var(--px);color:var(--ac)}
+.credits p{color:var(--mut)}
+.cta{display:inline-block;margin-top:20px;padding:16px 26px;background:var(--ac);color:#111;font:400 12px var(--px);text-decoration:none;box-shadow:4px 4px 0 var(--ac2);transition:transform .2s}
+.cta:hover{transform:translate(-2px,-3px)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body class="lock">
+<div id="boot"><div class="bw">
+  <div class="px">PLAYER 1</div>
+  <h1 class="bt">HONEY SANDHU</h1>
+  <div class="px" id="bl">LOADING CAREER DATA…</div>
+  <div class="bb"><i id="bi"></i></div>
+  <button id="start" disabled>▶ PRESS START</button>
+</div></div>
+<div id="glow"></div><canvas id="cf"></canvas><div id="lvup"></div>
+<div class="hud" role="banner">
+  <span class="lv" id="lv">LV 00</span>
+  <div class="bar"><i id="pbar"></i></div>
+  <span class="xp" id="xp">0000 XP</span>
+  <button id="theme" aria-label="Toggle theme">◐</button>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<header class="hero" id="hero">
+  <canvas id="stars"></canvas>
+  <div class="stage" id="stage">
+    <div class="kicker px" id="hRole"></div>
+    <h1 class="gl" id="hName"></h1>
+    <p id="hTag"></p>
+    <div class="scroll px">SCROLL TO PLAY ↓</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="sec" style="padding-bottom:0">
+    <h2 class="big rv">Player Card</h2>
+    <p class="sub rv d1" id="sum" style="max-width:680px;font-size:18px"></p>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <div class="track" id="track"><div class="fill" id="fill"></div><div class="plr" id="plr">🚚</div></div>
+
+  <section class="sec">
+    <h2 class="big rv">Side Quests</h2>
+    <p class="sub rv d1">Tap or press Enter to flip a card. Hover to tilt.</p>
+    <div class="grid" id="projects"></div>
+  </section>
+
+  <section class="sec">
+    <h2 class="big rv">Trophy Room</h2>
+    <p class="sub rv d1">Locked until you reach the level where each one was earned.</p>
+    <div class="trophies" id="trophies"></div>
+  </section>
+
+  <section class="sec">
+    <h2 class="big rv">Inventory</h2>
+    <p class="sub rv d1">Skills collected along the way.</p>
+    <div class="chips rv d2" id="skills"></div>
+    <div class="sub2 px rv">LANGUAGES</div>
+    <div class="chips rv" id="langs"></div>
+  </section>
+</main>
+
+<footer class="credits">
+  <div class="px rv" style="color:var(--ac3)">★ ★ ★</div>
+  <h2 class="rv d1">GAME CLEARED</h2>
+  <p class="rv d2" id="cTx"></p>
+  <a class="cta rv d3" id="cLink" href="#">▶ PLAYER 2 PRESS HERE</a>
+</footer>
+
+<script>
+const CFG = {
+  name: "Honey Sandhu",
+  role: "Fulfillment Supervisor",
+  loc: "Abu Dhabi, UAE",
+  tagline: "6+ years, from Core Colleague to Supervisor at Noon.com. Ready to play?",
+  email: "Hnysandhu50@gmail.com",
+  credits: "Warehouse operations, quality and people leadership. Thanks for playing!",
+  summary: "Warehouse operations and people management professional with 6+ years in quality control, training, compliance, dispatch and process improvement. Progressed from Core Colleague to Team Leader and Supervisor at Noon.com, now leading a 15-member team that supports warehouse performance, audits, employee development and efficiency. Known for reducing non-compliance, improving onboarding, increasing salvage recovery and building dashboards and internal audit tools that cut cost and time.",
+  card: [{n:6,s:"+",l:"years in the game"},{n:4,s:"",l:"roles held"},{n:6,s:"",l:"awards earned"},{n:15,s:"",l:"people led"}],
+  levels: [
+    {title:"The Dispatcher", icon:"🚚", years:"11/2017 – 06/2019 · Harjas Freight Inc · India", text:"Where the logistics journey began: keeping vehicles, drivers and shipments moving on schedule.", boss:{n:"DELIVERY DELAYS",hp:0,t:"DEFEATED ✔"}, stats:[], points:["Managed daily dispatch, route planning, vehicle scheduling and shipment follow-up","Coordinated drivers, warehouse teams and customers to resolve delays","Handled billing, invoicing, attendance, payroll inputs and incentive calculations","Maintained dispatch records and reports; supported daily workforce planning"]},
+    {title:"The Core Colleague", icon:"🔎", years:"07/2020 – 01/2022 · Noon.com · Dubai, UAE", text:"Joined Internal Quality Assurance and earned the step up to Team Leader on performance and knowledge.", boss:{n:"RECURRING ISSUES",hp:0,t:"DEFEATED ✔"}, stats:[], points:["Ran QA audits independently across inbound, outbound, inventory and warehouse support","Identified recurring issues, reported root causes and supported corrective actions","Delivered training and awareness sessions based on audit findings","Monitored SOP and 5S compliance; kept audit records, NC reports and trackers"]},
+    {title:"The Team Leader", icon:"📋", years:"01/2022 – 03/2025 · Noon.com · Dubai, UAE", text:"Supervised QA and training across the full fulfilment chain.", boss:{n:"CUSTOMER ESCALATIONS",hp:0,t:"DEFEATED ✔"}, stats:[], points:["Supervised QA and training across inbound, outbound, inventory, returns and fulfilment","Handled customer-impacting escalations and followed up on corrective actions","Delivered training on SOP changes, quality standards and new system rollouts","Conducted 5S audits and maintained RCA for NPS feedback and complaints","Coordinated meetings with Operations, Logistics, Inventory, Training and ICQA"]},
+    {title:"The Supervisor", icon:"⭐", years:"03/2025 – Present · Noon.com · Dubai, UAE", text:"Leading the Internal QA and Learning & Development team.", boss:{n:"NON-COMPLIANCE",hp:80,t:"−20% AND COUNTING"}, stats:[{n:15,s:"",l:"team members led"},{n:600,s:"+",l:"employees onboarded"},{n:55,s:"",l:"cross-functional audits"},{n:20,s:"%",l:"less non-compliance"}], points:["Planned daily workloads, coached the team and monitored output","Cut non-compliance by 20% through weekly reviews and corrective actions","Improved new-joiner performance by 10% and salvage recovery by 15–25%","Reported performance using WMS, BigQuery, Excel and Google Sheets","Ran soft skills and behavioural training on communication, ownership and accountability"]}
+  ],
+  awards: [
+    {t:"Best Fulfillment Performance", d:"01/04/2021", lv:1},
+    {t:"Best QA", d:"20/10/2022", lv:2},
+    {t:"Outstanding Performance", d:"18/12/2023", lv:2},
+    {t:"Game Changer", d:"10/03/2024", lv:2},
+    {t:"Leadership Excellence", d:"29/01/2025", lv:2},
+    {t:"Leadership Excellence", d:"18/08/2026", lv:3}
+  ],
+  skills: ["Warehouse Operations","Team Leadership","Workforce Planning","Performance Management","Process Improvement","Quality & Compliance","KPI Reporting","Stakeholder Coordination","Root Cause Analysis","Training & Development","Advanced Excel","WMS & BigQuery","5S & Audit Management"],
+  langs: ["English","Hindi","Punjabi"],
+  projects: [
+    {name:"Audit Engine", tag:"QUALITY", blurb:"55 cross-functional audits, tracked to closure.", detail:"Corrective actions followed up until closed, with RCA kept for recurring failures and customer complaints.", stack:"Audits · RCA · WMS"},
+    {name:"Salvage Boost", tag:"RECOVERY", blurb:"Salvage recovery up by 15–25%.", detail:"Achieved through process changes and close coordination across teams.", stack:"Process · Teamwork"},
+    {name:"Smart Tools", tag:"AUTOMATION", blurb:"Dashboards and internal tools built in JavaScript.", detail:"Created with the help of AI to reduce rework, cost, timing and manpower.", stack:"JavaScript · BigQuery · Sheets"}
+  ]
+};
+
+const $ = s => document.querySelector(s);
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const pad = n => String(n).padStart(2,"0");
+const cssv = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+document.title = CFG.name + " — The Game";
+$("#hRole").textContent = "PLAYER 1 · " + CFG.loc.toUpperCase();
+$("#hName").textContent = CFG.name.toUpperCase();
+$("#hName").dataset.t = CFG.name.toUpperCase();
+$("#cTx").textContent = CFG.credits;
+$("#sum").textContent = CFG.summary;
+$("#cLink").href = "mailto:" + CFG.email;
+
+const stat = (t, c) => `<div class="${c}"><b data-to="${t.n}" data-s="${t.s}">0${t.s}</b><span>${t.l}</span></div>`;
+$("#tiles").innerHTML = CFG.card.map(t => stat(t, "tile")).join("");
+
+const track = $("#track");
+CFG.levels.forEach((L,i) => {
+  const s = document.createElement("section");
+  s.className = "level";
+  s.innerHTML = `<span class="node"></span>
+    <div class="tag px rv">LEVEL ${pad(i+1)}</div>
+    <h2 class="rv d1">${L.title}</h2>
+    <p class="yrs rv d1">${L.years}</p>
+    <p class="tx rv d2">${L.text}</p>
+    <ul class="pts rv d2">${L.points.map(p => `<li>${p}</li>`).join("")}</ul>
+    ${L.stats.length ? `<div class="stats rv d3">${L.stats.map(t => stat(t, "stat")).join("")}</div>` : ""}
+    <div class="boss rv d3"><div class="px">BOSS · ${L.boss.n}</div><div class="hp"><i data-hp="${L.boss.hp}"></i></div><div class="px hpt">${L.boss.t}</div></div>`;
+  track.appendChild(s);
+});
+
+function tiltable(d, t) {
+  if (reduce) return;
+  d.addEventListener("pointermove", e => {
+    if (e.pointerType === "touch") return;
+    const r = d.getBoundingClientRect();
+    const x = (e.clientX - r.left)/r.width - .5, y = (e.clientY - r.top)/r.height - .5;
+    t.style.transform = `rotateY(${x*14}deg) rotateX(${-y*14}deg)`;
+  });
+  d.addEventListener("pointerleave", () => t.style.transform = "");
+}
+
+CFG.projects.forEach((p,i) => {
+  const d = document.createElement("div");
+  d.className = "pc rv d" + (i+1);
+  d.innerHTML = `<div class="tilt"><div class="flip" tabindex="0" role="button" aria-pressed="false">
+    <div class="face f"><div><small>${p.tag}</small><h3>${p.name}</h3><p>${p.blurb}</p></div><span class="hint">Tap to reveal ↻</span></div>
+    <div class="face k"><div><small>${p.stack}</small><p>${p.detail}</p></div><span class="hint">Tap to flip back ↻</span></div>
+  </div></div>`;
+  $("#projects").appendChild(d);
+  const flip = d.querySelector(".flip");
+  const toggle = () => flip.setAttribute("aria-pressed", d.classList.toggle("open"));
+  flip.addEventListener("click", toggle);
+  flip.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+  tiltable(d, d.querySelector(".tilt"));
+});
+
+CFG.awards.forEach((a,k) => {
+  const d = document.createElement("div");
+  d.className = "tr rv d" + (k % 4);
+  d.id = "a" + k;
+  d.innerHTML = `<div><div class="ic">🔒</div><b>${a.t}</b><span>${a.d}</span></div>`;
+  $("#trophies").appendChild(d);
+  tiltable(d, d.firstChild);
+});
+CFG.skills.forEach(s => { const c = document.createElement("span"); c.className = "chip"; c.textContent = s; $("#skills").appendChild(c); });
+CFG.langs.forEach(s => { const c = document.createElement("span"); c.className = "chip lang"; c.textContent = s; $("#langs").appendChild(c); });
+
+// Starfield
+const cv = $("#stars"), cx = cv.getContext("2d");
+let W, H, S = [], col = "#fff";
+function size() {
+  W = cv.width = cv.offsetWidth; H = cv.height = cv.offsetHeight;
+  S = Array.from({length: Math.min(130, W/7)}, () => ({x: Math.random()*W, y: Math.random()*H, z: Math.random()*2 + .4}));
+  col = cssv("--fg");
+}
+function draw() {
+  cx.clearRect(0, 0, W, H); cx.fillStyle = col;
+  S.forEach(s => { const y = (((s.y - scrollY*.25*s.z) % H) + H) % H; cx.globalAlpha = .2 + s.z/3; cx.fillRect(s.x, y, s.z, s.z); });
+  if (!reduce) requestAnimationFrame(draw);
+}
+size(); draw(); addEventListener("resize", size);
+
+// Confetti
+const cf = $("#cf"), cc = cf.getContext("2d");
+let P = [], run = 0;
+function burst() {
+  if (reduce) return;
+  cf.width = innerWidth; cf.height = innerHeight;
+  const cols = ["--ac","--ac2","--ac3"].map(cssv);
+  for (let i = 0; i < 80; i++) P.push({x: innerWidth/2, y: innerHeight*.4, vx: (Math.random()-.5)*14, vy: Math.random()*-11 - 3, c: cols[i%3], r: Math.random()*6 + 3, l: 1});
+  if (!run) { run = 1; fall(); }
+}
+function fall() {
+  cc.clearRect(0, 0, cf.width, cf.height);
+  P = P.filter(p => p.l > 0);
+  P.forEach(p => { p.vy += .35; p.x += p.vx; p.y += p.vy; p.l -= .013; cc.globalAlpha = Math.max(p.l, 0); cc.fillStyle = p.c; cc.fillRect(p.x, p.y, p.r, p.r); });
+  if (P.length) requestAnimationFrame(fall); else { run = 0; cc.clearRect(0, 0, cf.width, cf.height); }
+}
+
+// Boot screen
+let bp = 0;
+const msgs = ["LOADING CAREER DATA…","COUNTING AUDITS…","POLISHING TROPHIES…","READY!"];
+(function load() {
+  bp = Math.min(100, bp + (reduce ? 100 : Math.random()*9 + 3));
+  $("#bi").style.width = bp + "%";
+  $("#bl").textContent = msgs[Math.min(3, Math.floor(bp/34))];
+  if (bp < 100) setTimeout(load, 70); else { $("#start").disabled = false; $("#start").focus(); }
+})();
+function typeIt() {
+  const el = $("#hTag"); let i = 0;
+  if (reduce) { el.textContent = CFG.tagline; return; }
+  (function t() { el.textContent = CFG.tagline.slice(0, ++i); if (i < CFG.tagline.length) setTimeout(t, 32); })();
+}
+$("#start").addEventListener("click", () => {
+  $("#boot").classList.add("hide");
+  document.body.classList.remove("lock");
+  typeIt();
+  setTimeout(() => $("#boot").remove(), 900);
+});
+
+// Reveal, counters, boss bars
+function count(el) {
+  const to = parseFloat(el.dataset.to), suf = el.dataset.s;
+  if (reduce) { el.textContent = to + suf; return; }
+  const t0 = performance.now();
+  (function step(t) {
+    const k = Math.min((t - t0)/1600, 1);
+    el.textContent = Math.round(to*(1 - Math.pow(1 - k, 3))) + suf;
+    if (k < 1) requestAnimationFrame(step);
+  })(t0);
+}
+const io = new IntersectionObserver(es => es.forEach(en => {
+  if (!en.isIntersecting) return;
+  en.target.classList.add("in");
+  en.target.querySelectorAll("[data-to]").forEach(count);
+  en.target.querySelectorAll("[data-hp]").forEach(b => { b.style.width = b.dataset.hp + "%"; });
+  io.unobserve(en.target);
+}), {threshold:.25});
+document.querySelectorAll(".rv").forEach(el => io.observe(el));
+
+// Levels, level-up banner, trophies
+const levels = [...document.querySelectorAll(".level")];
+const unlocked = new Set(), toast = $("#toast"), lvup = $("#lvup");
+let tt;
+function notify(msg) {
+  toast.innerHTML = "<b>TROPHY UNLOCKED</b> · " + msg;
+  toast.classList.add("show");
+  clearTimeout(tt);
+  tt = setTimeout(() => toast.classList.remove("show"), 2800);
+}
+const lio = new IntersectionObserver(es => es.forEach(en => {
+  const i = levels.indexOf(en.target);
+  if (!en.isIntersecting) return;
+  en.target.classList.add("on");
+  if (unlocked.has(i)) return;
+  unlocked.add(i);
+  lvup.textContent = "LEVEL UP! " + pad(i + 1);
+  lvup.classList.remove("show"); void lvup.offsetWidth; lvup.classList.add("show");
+  const got = [];
+  CFG.awards.forEach((a,k) => {
+    const el = $("#a" + k);
+    if (a.lv <= i && !el.classList.contains("on")) { el.classList.add("on"); el.querySelector(".ic").textContent = "🏆"; got.push(a.t); }
+  });
+  if (got.length) { setTimeout(() => notify(got.join(", ")), 700); burst(); }
+}), {rootMargin:"-45% 0px -45% 0px"});
+levels.forEach(l => lio.observe(l));
+
+// Progress, HUD, player
+const fill = $("#fill"), plr = $("#plr");
+let tick = false;
+function onScroll() {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  const p = max > 0 ? Math.min(scrollY/max, 1) : 0;
+  $("#pbar").style.width = (p*100) + "%";
+  $("#xp").textContent = pad(Math.round(p*9999)).padStart(4, "0") + " XP";
+  const tr = track.getBoundingClientRect();
+  const tp = Math.max(0, Math.min((innerHeight*.5 - tr.top)/tr.height, 1));
+  fill.style.height = plr.style.top = (tp*100) + "%";
+  let cur = 0;
+  levels.forEach((l,i) => { if (l.getBoundingClientRect().top < innerHeight*.5) cur = i + 1; });
+  $("#lv").textContent = "LV " + pad(cur);
+  plr.textContent = CFG.levels[Math.max(cur - 1, 0)].icon;
+  tick = false;
+}
+addEventListener("scroll", () => { if (!tick) { tick = true; requestAnimationFrame(onScroll); } }, {passive:true});
+addEventListener("resize", onScroll);
+onScroll();
+
+// Hero parallax, cursor glow
+const stage = $("#stage");
+if (!reduce) {
+  $("#hero").addEventListener("pointermove", e => {
+    stage.style.transform = `rotateY(${(e.clientX/innerWidth - .5)*16}deg) rotateX(${-(e.clientY/innerHeight - .5)*12}deg)`;
+  });
+  $("#hero").addEventListener("pointerleave", () => stage.style.transform = "");
+  addEventListener("pointermove", e => { $("#glow").style.transform = `translate(${e.clientX}px,${e.clientY}px)`; });
+}
+
+// Theme toggle
+$("#theme").addEventListener("click", () => {
+  const r = document.documentElement;
+  const dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  r.dataset.theme = dark ? "light" : "dark";
+  size();
+});
+</script>
+</body>
+</html>
