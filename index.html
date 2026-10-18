@@ -230,7 +230,7 @@ const CFG = {
     {title:"The Dispatcher", icon:"🚚", scene:"road", years:"11/2017 – 06/2019 · Harjas Freight Inc · India", text:"Where the logistics journey began: keeping trucks, drivers and shipments moving on schedule.", boss:{n:"Delivery delays",hp:0,t:"Resolved ✓"}, stats:[], points:["Managed daily dispatch, route planning, vehicle scheduling and shipment follow-up","Coordinated drivers, warehouse teams and customers to resolve delays","Handled billing, invoicing, attendance, payroll inputs and incentive calculations","Maintained dispatch records and reports; supported daily workforce planning"]},
     {title:"The Core Colleague", icon:"🔎", scene:"qa", years:"07/2020 – 01/2022 · Noon.com · Dubai, UAE", text:"Joined Internal Quality Assurance and earned the step up to Team Leader on performance and knowledge.", boss:{n:"Recurring issues",hp:0,t:"Resolved ✓"}, stats:[], points:["Ran QA audits independently across inbound, outbound, inventory and warehouse support","Identified recurring issues, reported root causes and supported corrective actions","Delivered training and awareness sessions based on audit findings","Monitored SOP and 5S compliance; kept audit records, NC reports and trackers"]},
     {title:"The Team Leader", icon:"📦", scene:"io", years:"01/2022 – 03/2025 · Noon.com · Dubai, UAE", text:"Supervised QA and training across the full fulfilment chain.", boss:{n:"Customer escalations",hp:0,t:"Resolved ✓"}, stats:[], points:["Supervised QA and training across inbound, outbound, inventory, returns and fulfilment","Handled customer-impacting escalations and followed up on corrective actions","Delivered training on SOP changes, quality standards and new system rollouts","Conducted 5S audits and maintained RCA for NPS feedback and complaints","Coordinated meetings with Operations, Logistics, Inventory, Training and ICQA"]},
-    {title:"The Supervisor", icon:"🚐", scene:"yard", years:"03/2025 – Present · Noon.com · Dubai, UAE", text:"Leading the Internal QA and Learning & Development team.", boss:{n:"Non-compliance",hp:80,t:"−20% and counting"}, stats:[{n:15,s:"",l:"team members led"},{n:600,s:"+",l:"employees onboarded"},{n:55,s:"",l:"cross-functional audits"},{n:20,s:"%",l:"less non-compliance"}], points:["Planned daily workloads, coached the team and monitored output","Cut non-compliance by 20% through weekly reviews and corrective actions","Improved new-joiner performance by 10% and salvage recovery by 15–25%","Reported performance using WMS, BigQuery, Excel and Google Sheets","Ran soft skills and behavioural training on communication, ownership and accountability"]}
+    {title:"The Supervisor", icon:"🚐", scene:"yard", years:"03/2025 – Present · Noon.com · Dubai, UAE", text:"Leading the Internal QA and Learning & Development team.", boss:{n:"Non-compliance",hp:80,t:"−20% and counting"}, stats:[{n:15,s:"",l:"team members led"},{n:600,s:"+",l:"employees onboarded"},{n:5,s:"S",l:"cross-functional audits"},{n:20,s:"%",l:"less non-compliance"}], points:["Planned daily workloads, coached the team and monitored output","Conducted 5S cross-functional audits across departments and tracked corrective actions to closure","Cut non-compliance by 20% through weekly reviews and corrective actions","Improved new-joiner performance by 10% and salvage recovery by 15–25%","Reported performance using WMS, BigQuery, Excel and Google Sheets","Ran soft skills and behavioural training on communication, ownership and accountability","Handle customer and seller complaints and investigate suspected fake shipments","Build tools with AI to reduce rework, cost and manpower"]}
   ],
   awards: [
     {t:"Best Fulfillment Performance", d:"01/04/2021", lv:1},
@@ -243,9 +243,10 @@ const CFG = {
   skills: ["Warehouse Operations","Team Leadership","Workforce Planning","Performance Management","Process Improvement","Quality & Compliance","KPI Reporting","Stakeholder Coordination","Root Cause Analysis","Training & Development","Advanced Excel","WMS & BigQuery","5S & Audit Management"],
   langs: ["English","Hindi","Punjabi"],
   projects: [
-    {name:"Audit Engine", tag:"QUALITY", blurb:"55 cross-functional audits, tracked to closure.", detail:"Corrective actions followed up until closed, with RCA kept for recurring failures and customer complaints.", stack:"Audits · RCA · WMS"},
+    {name:"Audit Engine", tag:"QUALITY", blurb:"Useful for internal audits.", detail:"Supports 5S cross-functional audits across departments, with corrective actions tracked until closed and RCA kept for recurring failures.", stack:"5S · Audits · RCA"},
+    {name:"Complaint Desk", tag:"INVESTIGATION", blurb:"Seller complaints and customer complaints.", detail:"Reviewing complaints and recurring failures, finding root causes and tracking corrective actions to closure.", stack:"RCA · WMS · BigQuery"},
     {name:"Salvage Boost", tag:"RECOVERY", blurb:"Salvage recovery up by 15–25%.", detail:"Achieved through process changes and close coordination across teams.", stack:"Process · Teamwork"},
-    {name:"Smart Tools", tag:"AUTOMATION", blurb:"Dashboards and internal tools built in JavaScript.", detail:"Created with the help of AI to reduce rework, cost, timing and manpower.", stack:"JavaScript · BigQuery · Sheets"}
+    {name:"Smart Tools", tag:"AUTOMATION", blurb:"AI-assisted dashboards and internal tools built in JavaScript.", detail:"Built with AI to reduce rework, cost, timing and manpower.", stack:"JavaScript · BigQuery · Sheets"}
   ]
 };
 
@@ -312,7 +313,7 @@ function tiltable(d,t) {
 }
 CFG.projects.forEach((p,i) => {
   const d = document.createElement("div");
-  d.className = "pc rv d" + (i+1);
+  d.className = "pc rv d" + Math.min(i+1,3);
   d.innerHTML = `<div class="tilt"><div class="flip" tabindex="0" role="button" aria-pressed="false">
     <div class="face f"><div><small>${p.tag}</small><h3>${p.name}</h3><p>${p.blurb}</p></div><span class="hint">Tap to reveal ↻</span></div>
     <div class="face k"><div><small>${p.stack}</small><p>${p.detail}</p></div><span class="hint">Tap to flip back ↻</span></div>
